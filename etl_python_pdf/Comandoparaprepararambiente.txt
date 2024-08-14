@@ -1,0 +1,30 @@
+# Comando para preparar o ambiente
+
+
+#Cria o ambiente conda
+conda create --name etl_python_pdf
+
+#Ativa o ambiente criado
+conda activate etl_python_pdf
+
+#Instala gerenciado de pacotes pip
+conda install pip
+
+#Instala pacote camelot-py
+pip install camelot-py
+
+#Instala opencv_python
+pip install opencv
+
+pip install matplotlib
+
+pip install ghostscript
+
+pip install pandas
+
+pip instal psycopg2-binary
+
+pip instal sqlalchemy
+
+pip install unicode
+
