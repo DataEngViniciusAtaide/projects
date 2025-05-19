@@ -220,6 +220,9 @@ def process_issues_in_batches(sheet, issues, existing_issue_numbers, headers_ini
     return new_issues_count
 
 def main():
+    logging.info("Variáveis de ambiente disponíveis:")
+    for key in ['GH_TOKEN', 'GITHUB_TOKEN', 'GOOGLE_APPLICATION_CREDENTIALS']:
+    logging.info(f"{key}: {'*****' if os.environ.get(key) else 'Não encontrada'}")
     if not test_github_auth():
         return
     github_data = get_github_project_data()
