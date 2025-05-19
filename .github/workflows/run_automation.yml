@@ -22,22 +22,48 @@ jobs:
         run: |
           pip install gspread oauth2client requests
 
+      - name: Verificar segredos
+        run: |
+          if [ -z "${{ secrets.GH_TOKEN }}" ]; then
+            echo "❌ GH_TOKEN não está configurado"
+            exit 1
+          fi
+          if [ -z "${{ secrets.GOOGLE_CREDS }}" ]; then
+            echo "❌ GOOGLE_CREDS não está configurado"
+            exit 1
+          fi
+          echo "✅ Segredos verificados"
+
       - name: Criar arquivo de credenciais do Google
         env:
           GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
         run: |
           echo "$GOOGLE_CREDS" > credentials.json
-          # Verifica se o arquivo foi criado corretamente
+          chmod 600 credentials.json  # Importante para segurança
+          
+          # Verificação detalhada do arquivo
           if [ -s credentials.json ]; then
             echo "✅ Arquivo credentials.json criado com sucesso"
+            echo "Tamanho do arquivo: $(wc -c < credentials.json) bytes"
           else
             echo "❌ Falha ao criar credentials.json"
+            ls -la
             exit 1
           fi
 
-      - name: Executar script Python
+      - name: Executar script Python com debug
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}  # Consistente com o script
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Note que usamos GH_TOKEN aqui
           GOOGLE_APPLICATION_CREDENTIALS: credentials.json
         run: |
-          python automations/github_to_sheets.py
+          echo "=== Variáveis de ambiente ==="
+          printenv | grep -E 'GH_TOKEN|GOOGLE'
+          
+          echo "=== Conteúdo do credentials.json ==="
+          head credentials.json
+          
+          echo "=== Executando script ==="
+          python automations/github_to_sheets.py || {
+            echo "❌ Falha na execução do script";
+            exit 1;
+          }
