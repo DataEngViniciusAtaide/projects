@@ -23,17 +23,19 @@ PROJECT_ID = "PVT_kwHOCqE-wc4ArbN8"
 SPREADSHEET_ID = "1vdwjCK2vrPm0L4-sUWcmwFYwz3DaYRzA2PYN-t9kWsQ"
 SHEET_NAME = "Sheet1"
 CREDENTIALS_FILE = "credentials.json"
-GITHUB_TOKEN = os.environ.get('GH-TOKEN')  # Mude para GITHUB_TOKEN para consistência
+# Modifique esta parte:
+GITHUB_TOKEN = os.environ.get('GH_TOKEN')  # Deve bater com o nome no workflow
 if not GITHUB_TOKEN:
     logging.error("❌ Token do GitHub não encontrado nas variáveis de ambiente")
     sys.exit(1)
 
-EXPECTED_HEADERS = ["Número", "Título", "Estado", "URL", "Status", "Prioridade", "Complexidade", "Departamento", "Data Atualização"]
-
 HEADERS = {
-    "Authorization": f"token {os.environ.get('GITHUB-TOKEN')}",
+    "Authorization": f"token {GITHUB_TOKEN}",  # Use a variável já obtida
     "Accept": "application/vnd.github+json"
 }
+
+EXPECTED_HEADERS = ["Número", "Título", "Estado", "URL", "Status", "Prioridade", "Complexidade", "Departamento", "Data Atualização"]
+
 
 MAX_RETRIES = 5
 BATCH_SIZE = 10
