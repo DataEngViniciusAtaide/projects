@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 PROJECT_ID = "PVT_kwHOCqE-wc4ArbN8"
 SPREADSHEET_ID = "1vdwjCK2vrPm0L4-sUWcmwFYwz3DaYRzA2PYN-t9kWsQ"
 SHEET_NAME = "Sheet1"
-GITHUB_TOKEN = os.environ.get("MY_GITHUB_TOKEN")
+GITHUB_TOKEN = os.environ.get("GH_TOKEN")
 CREDENTIALS_FILE = "credentials.json"
 
 EXPECTED_HEADERS = ["Número", "Título", "Estado", "URL", "Status", "Prioridade", "Complexidade", "Departamento", "Data Atualização"]
