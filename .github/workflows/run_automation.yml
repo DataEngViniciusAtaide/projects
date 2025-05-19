@@ -25,7 +25,7 @@ jobs:
       - name: Executar script
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_CREDS }}
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
          echo "$GOOGLE_APPLICATION_CREDENTIALS" > credentials.json
           python automations/github_to_sheets.py
