@@ -27,7 +27,7 @@ CREDENTIALS_FILE = "credentials.json"
 EXPECTED_HEADERS = ["Número", "Título", "Estado", "URL", "Status", "Prioridade", "Complexidade", "Departamento", "Data Atualização"]
 
 HEADERS = {
-    "Authorization": f"Bearer {GITHUB_TOKEN}",
+    "Authorization": f"token {GITHUB_TOKEN}",
     "Accept": "application/vnd.github+json"
 }
 
