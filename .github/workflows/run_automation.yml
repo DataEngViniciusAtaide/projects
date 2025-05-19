@@ -26,11 +26,18 @@ jobs:
         env:
           GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
         run: |
-          echo "$GOOGLE_CREDS" | tr -d '\r' > credentials.json
+          echo "$GOOGLE_CREDS" > credentials.json
+          # Verifica se o arquivo foi criado corretamente
+          if [ -s credentials.json ]; then
+            echo "✅ Arquivo credentials.json criado com sucesso"
+          else
+            echo "❌ Falha ao criar credentials.json"
+            exit 1
+          fi
 
       - name: Executar script Python
         env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}  # Consistente com o script
           GOOGLE_APPLICATION_CREDENTIALS: credentials.json
-          GITHUB_TOKEN: ${{ github.token }} 
         run: |
           python automations/github_to_sheets.py
