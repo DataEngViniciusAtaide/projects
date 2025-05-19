@@ -23,7 +23,7 @@ PROJECT_ID = "PVT_kwHOCqE-wc4ArbN8"
 SPREADSHEET_ID = "1vdwjCK2vrPm0L4-sUWcmwFYwz3DaYRzA2PYN-t9kWsQ"
 SHEET_NAME = "Sheet1"
 CREDENTIALS_FILE = "credentials.json"
-GITHUB_TOKEN = os.environ.get('GITHUB-TOKEN')  # Mude para GITHUB_TOKEN para consistência
+GITHUB_TOKEN = os.environ.get('GH-TOKEN')  # Mude para GITHUB_TOKEN para consistência
 if not GITHUB_TOKEN:
     logging.error("❌ Token do GitHub não encontrado nas variáveis de ambiente")
     sys.exit(1)
