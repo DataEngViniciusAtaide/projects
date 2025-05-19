@@ -27,5 +27,5 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_CREDS }}
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
-          echo "$GOOGLE_APPLICATION_CREDENTIALS" > automations/credentials.json
+         echo "$GOOGLE_APPLICATION_CREDENTIALS" > credentials.json
           python automations/github_to_sheets.py
