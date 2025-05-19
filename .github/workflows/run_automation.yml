@@ -22,10 +22,15 @@ jobs:
         run: |
           pip install gspread oauth2client requests
 
-      - name: Executar script
+      - name: Criar arquivo de credenciais do Google
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_CREDS }}
+          GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
+        run: |
+          echo "$GOOGLE_CREDS" | tr -d '\r' > credentials.json
+
+      - name: Executar script Python
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: credentials.json
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          echo -e "$GOOGLE_APPLICATION_CREDENTIALS" > credentials.json
           python automations/github_to_sheets.py
