@@ -2,8 +2,8 @@ name: GitHub to Google Sheets Automation
 
 on:
   schedule:
-    - cron: '0 0,6,12,18 * * *'  # 4 vezes ao dia: 00h, 06h, 12h, 18h UTC
-  workflow_dispatch:  # Permite execução manual
+    - cron: '0 0,6,12,18 * * *'  # 4 vezes ao dia
+  workflow_dispatch:
 
 jobs:
   run-script:
@@ -27,5 +27,5 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_CREDS }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-         echo "$GOOGLE_APPLICATION_CREDENTIALS" > credentials.json
+          echo -e "$GOOGLE_APPLICATION_CREDENTIALS" > credentials.json
           python automations/github_to_sheets.py
