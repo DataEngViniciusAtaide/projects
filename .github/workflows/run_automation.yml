@@ -31,6 +31,6 @@ jobs:
       - name: Executar script Python
         env:
           GOOGLE_APPLICATION_CREDENTIALS: credentials.json
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: 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
         run: |
           python automations/github_to_sheets.py
