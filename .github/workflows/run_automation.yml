@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: '0 0,6,12,18 * * *'  # 4 vezes ao dia
   workflow_dispatch:
+  issues:
+    types: [opened, edited, closed, reopened, labeled, unlabeled]
 
 jobs:
   run-script:
