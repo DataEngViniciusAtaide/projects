@@ -13,6 +13,7 @@ import logging
 import time
 import random
 import os
+import sys
 
 # Configuração de logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -21,13 +22,16 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 PROJECT_ID = "PVT_kwHOCqE-wc4ArbN8"
 SPREADSHEET_ID = "1vdwjCK2vrPm0L4-sUWcmwFYwz3DaYRzA2PYN-t9kWsQ"
 SHEET_NAME = "Sheet1"
-GITHUB_TOKEN = os.environ.get('GH_TOKEN')
 CREDENTIALS_FILE = "credentials.json"
+GITHUB_TOKEN = os.environ.get('GITHUB-TOKEN')  # Mude para GITHUB_TOKEN para consistência
+if not GITHUB_TOKEN:
+    logging.error("❌ Token do GitHub não encontrado nas variáveis de ambiente")
+    sys.exit(1)
 
 EXPECTED_HEADERS = ["Número", "Título", "Estado", "URL", "Status", "Prioridade", "Complexidade", "Departamento", "Data Atualização"]
 
 HEADERS = {
-    "Authorization": f"token {os.environ.get('GH_TOKEN')}",
+    "Authorization": f"token {os.environ.get('GITHUB-TOKEN')}",
     "Accept": "application/vnd.github+json"
 }
 
