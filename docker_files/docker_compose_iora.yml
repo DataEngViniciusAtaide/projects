@@ -1,0 +1,193 @@
+version: '3.8'
+
+services:
+  # Banco de Dados (MariaDB)
+  db:
+    image: mariadb:10.6
+    container_name: mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "SenhaRoot@123"  # Senha do root
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+
+# Postgres
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: SenhaPostgres123
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  # Gitea (Git Management)
+  gitea:
+    image: gitea/gitea:latest
+    container_name: gitea
+    restart: unless-stopped
+    ports:
+      - "3002:3000"  # Porta 3002 no host → 3000 no container
+      - "2223:22"    # SSH alternativo (2222 pode estar em uso)
+    volumes:
+      - gitea_data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - USER_UID=1000  # Mesmo UID/GID do usuário do host (ajuste conforme `id -u`)
+      - USER_GID=1000
+
+
+
+# Redis
+  redis:
+    image: redis:6.2-alpine
+    container_name: redis
+    command:
+        - redis-server 
+        - "--tcp-keepalive 300" 
+        - "--timeout 0" 
+        - "--maxclients 10000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+
+ # Evolution API
+  evolution-api:
+    image: atendai/evolution-api:v2.2.2  # Sua imagem personalizada
+    container_name: evolution-api
+    restart: unless-stopped
+    environment:
+      DATABASE_PROVIDER: "postgresql"
+      DATABASE_CONNECTION_URI: "postgresql://postgres:SenhaPostgres123@postgres:5432/evolution_db?schema=public"
+      DB_HOST: "postgres"
+      DB_PORT: "5432"
+      DB_DATABASE: "evolution_db"  # Crie manualmente no MariaDB
+      DB_USERNAME: "postgres"          # ⚠️ Use um usuário dedicado em produção!
+      DB_PASSWORD: "SenhaPostgres123" # Mesma senha do root do MariaDB
+      REDIS_HOST: "redis"
+      REDIS_PORT: 6379
+      NODE_ENV: production
+      CACHE_REDIS_URI: "redis://redis:6379/6"
+      AUTHENTICATION_API_KEY: "429683C4C977415CAAFCCE10F7D57E11"
+      CONFIG_SESSION_PHONE_VERSION: "2.3000.1025512569"
+      WEBHOOK_URL: "http://10.75.50.251:5678/evolution-webhook"
+    ports:
+      - "3001:8080"  # Porta padrão da Evolution API
+    depends_on:
+      - db
+      - redis
+
+  # Zabbix Server (usando root)
+  zabbix-server:
+    image: zabbix/zabbix-server-mysql:ubuntu-5.4-latest
+    container_name: zabbix-server
+    restart: unless-stopped
+    environment:
+      DB_SERVER_HOST: "db"
+      MYSQL_USER: "root"                     # Usuário root
+      MYSQL_PASSWORD: "SenhaRoot@123"        # Senha do root
+    ports:
+      - "10051:10051"
+    depends_on:
+      - db
+
+  # Zabbix Web Interface
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-mysql:ubuntu-5.4-latest
+    container_name: zabbix-web
+    restart: unless-stopped
+    environment:
+      DB_SERVER_HOST: "db"
+      MYSQL_USER: "root"                     # Usuário root
+      MYSQL_PASSWORD: "SenhaRoot@123"        # Senha do root
+      ZBX_SERVER_HOST: "zabbix-server"
+    ports:
+      - "80:8080"
+    depends_on:
+      - zabbix-server
+
+  # Grafana
+  grafana:
+    image: grafana/grafana-enterprise:latest
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "GrafanaAdmin123"
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  # n8n (usando root)
+  n8n:
+    image: n8nio/n8n
+    container_name: n8n
+    restart: unless-stopped
+    user: "1000:1000"
+    environment:
+      DB_TYPE: "postgresdb"
+      DB_POSTGRESDB_HOST: "postgres"
+      DB_POSTGRESDB_PORT: "5432"
+      DB_POSTGRESDB_USER: "postgres"                       # Usuário root
+      DB_POSTGRESDB_PASSWORD: "SenhaPostgres123"          # Senha do root
+      DB_POSTGRESDB_DATABASE: "n8n_db"
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: "admin"
+      N8N_BASIC_AUTH_PASSWORD: "SenhaN8N123"
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "false"
+      N8N_RUNNERS_ENABLED: "true" 
+      N8N_LOG_LEVEL: "info"
+      NODE_ENV: "production"
+      N8N_PORT: "5678"
+      N8N_HOST: "0.0.0.0"
+      WEBHOOK_URL: "https://84286bced535.ngrok-free.app"
+      N8N_SECURE_COOKIE: "false"
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      - postgres
+    restart: always
+
+  # Portainer (Gerenciamento de Containers)
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      - "9000:9000"
+
+volumes:
+  db_data:
+  redis_data:
+  grafana_data:
+  n8n_data:
+  portainer_data:
+  pg_data:
+  gitea_data:
