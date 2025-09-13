@@ -151,11 +151,11 @@ def get_all_github_project_data():
         logging.error(f"❌ Erro ao buscar dados do GitHub: {e}")
         return None
 
-def extract_all_issues(github_data):
-    if not github_data or not github_data.get("data") or not github_data["data"].get("node"):
-        logging.error("❌ Dados do GitHub inválidos ou incompletos")
+def extract_all_issues(github_nodes):
+    if not github_nodes:
+        logging.error("❌ Nenhum dado retornado do GitHub")
         return []
-    return [node for node in github_data["data"]["node"]["items"]["nodes"] if node.get("content") and "number" in node["content"]]
+    return [node for node in github_nodes if node.get("content") and "number" in node["content"]]
 
 def get_existing_issue_numbers(sheet):
     try:
@@ -249,13 +249,16 @@ def main():
         logging.info(f"{key}: {'*****' if os.environ.get(key) else 'Não encontrada'}")
     if not test_github_auth():
         return
-    github_data = get_all_github_project_data()
-    if not github_data:
+
+    github_nodes = get_all_github_project_data()
+    if not github_nodes:
         return
-    issues = extract_all_issues(github_data)
+
+    issues = extract_all_issues(github_nodes)
     if not issues:
         logging.info("ℹ️ Nenhuma issue encontrada.")
         return
+
     sheet = get_google_sheet()
     if not sheet:
         return
