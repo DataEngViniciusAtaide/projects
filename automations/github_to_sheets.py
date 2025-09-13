@@ -75,12 +75,20 @@ def initialize_sheet_headers(sheet):
         return True
     return False
 
-def get_github_project_data():
+def get_all_github_project_data():
+    all_nodes = []
+    cursor = None
+    has_next_page = True
+
     query = """
-    query($projectId: ID!) {
+    query($projectId: ID!, $cursor: String) {
       node(id: $projectId) {
         ... on ProjectV2 {
-          items(first: 100) {
+          items(first: 100, after: $cursor) {
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
             nodes {
               content {
                 ... on Issue {
@@ -112,6 +120,22 @@ def get_github_project_data():
       }
     }
     """
+
+    while has_next_page:
+        response = requests.post(
+            "https://api.github.com/graphql",
+            headers=HEADERS,
+            json={"query": query, "variables": {"projectId": PROJECT_ID, "cursor": cursor}}
+        )
+
+        data = response.json()
+        items = data["data"]["node"]["items"]
+        all_nodes.extend(items["nodes"])
+        has_next_page = items["pageInfo"]["hasNextPage"]
+        cursor = items["pageInfo"]["endCursor"]
+
+    return all_nodes
+
     try:
         response = requests.post("https://api.github.com/graphql", headers=HEADERS, json={"query": query, "variables": {"projectId": PROJECT_ID}})
         if response.status_code != 200:
