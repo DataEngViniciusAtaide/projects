@@ -249,7 +249,7 @@ def main():
         logging.info(f"{key}: {'*****' if os.environ.get(key) else 'Não encontrada'}")
     if not test_github_auth():
         return
-    github_data = get_github_project_data()
+    github_data = get_all_github_project_data()
     if not github_data:
         return
     issues = extract_all_issues(github_data)
